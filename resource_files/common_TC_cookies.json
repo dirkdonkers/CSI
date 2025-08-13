@@ -1,0 +1,22 @@
+[
+    {
+      "CMP": "Google",
+      "cookie": "FCCDCF"
+    },
+    {
+      "CMP": "unk",
+      "cookie": "euconsent-v2"
+    },
+    { 
+      "CMP": "unk",
+      "cookie": "eupubconsent-v2"
+    },
+    { 
+      "CMP": "DPG Media",
+      "cookie": "pgConsentCache"
+    },
+    {
+      "CMP": "Usercentrics",
+      "cookie": "CookieConsent"
+    }
+]

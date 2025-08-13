@@ -1,0 +1,18 @@
+{ "testcases": 
+  [{ "name":"just_one",
+          "purposes":[1],
+          "vendors":"all"
+  },
+  { "name":"none",
+          "purposes":"none",
+          "vendors":"none"
+  },
+  { "name":"all-vendors-no-purpose",
+           "purposes":"none",
+           "vendors":"all"
+  },
+  { "name":"no-vendors-all-purposes",
+           "purposes":"all",
+           "vendors":"none"
+  }]
+}

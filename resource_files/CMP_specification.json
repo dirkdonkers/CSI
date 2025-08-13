@@ -1,0 +1,159 @@
+{ 
+  "DPG_media": {
+    "source_identifier": "dpgmedia.net",
+    "uses-shadow-host": true,
+    "shadow-root" : {
+	  "type": "id",
+	  "value": "pg-host-shadow-root"
+	},
+	"accept-button" : {
+	  "type": "id",
+	  "value": "pg-accept-btn"
+	}
+  },
+  "Ogury Ltd": {
+    "source_identifier": "consentmanager.net",
+	"uses-shadow-host": true,
+	"shadow-root" : {
+	  "type": "id",
+	  "value": "cmpwrapper"
+	},
+	"accept-button" : {
+	  "type": "id",
+	  "value": "cmpbntyestxt"
+	}
+  },
+  "Ogury Ltd": {
+    "source_identifier": "consentmanager.net",
+	"uses-shadow-host": true,
+	"shadow-root" : {
+	  "type": "id",
+	  "value": "cmpwrapper"
+	},
+	"accept-button" : {
+	  "type": "id",
+	  "value": "cmpbntyestxtcustom"
+	}
+  },
+  "Google Funding Choices": {
+    "source_identifier": "fundingchoicesmessages.google.com",
+	"uses-shadow-host": false,
+	"accept-button" : {
+	  "type": "class_name",
+	  "value": "fc-primary-button"
+	}
+  },
+  "Captify Technologies Limited": {
+    "source_identifier": "cdn.cookiecode",
+	"uses-shadow-host": true,
+	"shadow-root" : {
+	  "type": "tag_name",
+	  "value": "cookiecode-banner"
+	},
+	"accept-button" : {
+	  "type": "class_name",
+	  "value": "cc_button_allowall"
+	}
+  },
+  "Cookie Bot": {
+    "source_identifier": "consent.cookiebot.com",
+	"uses-shadow-host": false,
+	"accept-button": {
+	  "type": "id",
+	  "value": "CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll"
+	}
+  },
+  "Usercentrics": {
+    "source_identifier": "app.usercentrics.eu",
+	"uses-shadow-host": true,
+	"shadow-root" : {
+	  "type": "id",
+	  "value": "usercentrics-root"
+	},
+	"accept-button" : {
+	  "type": "class_name",
+	  "value": "sc-dcJsrY"
+	}
+  },
+    "Traffective GmbH": {
+    "source_identifier": "cdntrf.com",
+        "uses-shadow-host": true,
+        "shadow-root" : {
+          "type": "class_name",
+          "value": "cmp-root-container"
+        },
+        "accept-button" : {
+          "type": "class_name",
+          "value": "cmp-button-accept-all"
+        }
+  },
+  "Objectis Ltd": {
+    "source_identifier": "cookie-script.com",
+        "uses-shadow-host": false,
+        "accept-button" : {
+          "type": "id",
+          "value": "cookiescript_accept"
+        }
+  },
+  "InMobi PTE Ltd": {
+    "source_identifier": "inmobi.com",
+        "uses-shadow-host": false,
+        "accept-button" : {
+          "type": "id",
+          "value": "accept-btn"
+        }
+  },
+  "OneTrust LLC": {
+    "source_identifier": "onesignal.com",
+        "uses-shadow-host": false,
+        "accept-button" : {
+          "type": "id",
+          "value": "onetrust-accept-btn-handler"
+        }
+  },
+  "InMobi PTE Ltd 2": {
+    "source_identifier": "cmp.inmobi.com",
+        "uses-shadow-host": false,
+        "accept-button" : {
+          "type": "class_name",
+          "value": "css-1k3zih6"
+        }
+  },
+  "OneTrust LLC 2": {
+    "source_identifier": "cookielaw.org",
+        "uses-shadow-host": false,
+        "accept-button" : {
+          "type": "id",
+          "value": "onetrust-accept-btn-handler"
+        }
+  },
+  "Didomi": {
+    "source_identifier": "https://sdk.privacy-center.org/",
+        "uses-shadow-host": false,
+        "accept-button" : {
+          "type": "class_name",
+          "value": "jad_cmp_paywall_cta-cookies"
+        }
+  },
+  "Didomi 2": {
+    "source_identifier": "https://sdk.privacy-center.org/",
+        "uses-shadow-host": false,
+        "accept-button" : {
+          "type": "id",
+          "value": "didomi-notice-agree-button"
+        }
+  },
+  "Internetowy Dom Mediowy net S.A.": {
+    "source_identifier": "idmnet.pl",
+        "uses-shadow-host": false,
+        "accept-button" : {
+          "type": "class_name",
+          "value": "IVRkEFt6_w0xykKt8pr8"
+        }
+  }
+
+
+
+
+}
+

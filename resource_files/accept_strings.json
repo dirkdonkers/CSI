@@ -1,0 +1,44 @@
+{
+  "EN": {
+    "parameter": "en",
+    "strings": [
+    "accept", "agree", "consent"
+    ]
+  }, 
+  "NL": {
+    "parameter" : "nl",
+    "strings": [
+    "akkoord", "accept", "toestemming", "naar de website", "aanvaarden"
+    ]
+  },
+  "PL": {
+    "parameter": "pl",
+    "strings": [
+    "akceptuj", "przejdź do serwisu", "zgadzam", "zaakceptuj"
+    ]
+  },
+  "DE": {
+    "parameter": "de",
+    "strings": [
+    "zustimm", "akzeptiere", "erlaubnis", "einverstanden"
+    ]
+  },
+  "FR": {
+    "parameter": "fr",
+    "strings": [
+    "accepter", "consentement", "autorisation"
+    ]
+  },
+  "GR": {
+    "parameter": "gr",
+    "strings": [
+    "συμφωνώ", "συγκατάθεση", "άδεια", "δεχτεί", "αποδέχομαι", "ΣΥΜΦΩΝΩ", "ΑΠΟΔΕΧΟΜΑΙ"
+    ]
+  },
+  "BL": {
+    "parameter": "bl",
+    "strings": [
+    "съгласие", "съгласен", "разрешение", "прием", "Разреши всички"
+    ]
+  }
+}
