@@ -32,8 +32,9 @@ from selenium.webdriver.common.action_chains import ActionChains
 # Global variables
 parser: argparse.ArgumentParser()
 args: argparse.Namespace
-version = "0.0.5"
+version = "0.0.6"
 MAX_RETRIES = 3     #number of retries when exceptions occur
+TIME_FACTOR = 1     # variable to speed up script by reducing wait-times
 TCSTRING_MAGIC_HEADER = ""
 TCSTRING_REJECT_ALL = ""
 TCSTRINGS = []
@@ -291,9 +292,8 @@ def configure_crawler():
             print(f"[ERR] Exception while configuring crawler. ({consecutive_errors}" +
                   f"/{max_consecutive_errors})")
 
-            print(f"[DEB] Errormessage: {e}")
             if ( args.debug ) : print(f"[DEB] Errormessage: {e}")
-            time.sleep(10)
+            time.sleep(10 * TIME_FACTOR)
             consecutive_errors += 1 
             if ( consecutive_errors >= max_consecutive_errors ): 
                 print(f"[ERR] {max_consecutive_errors} consecutive errors while " +
@@ -392,7 +392,7 @@ Function to navigate to a webpage using the selenium webdriver
 def navigate_to_url(driver, domain) :
     url = str("https://" + domain)
     driver.get(url)
-    time.sleep(3)
+    time.sleep(3 * TIME_FACTOR)
 
 '''
 Function to detect the use of the TCF on a website, based on the pressence of 
@@ -794,7 +794,7 @@ def interact_dialog_accept_all(driver, url) :
             take_screenshot(driver, url)
 
     # Give website time to execute EventListener and store TC string
-    time.sleep(2)
+    time.sleep(2 * TIME_FACTOR)
     status = getTCFAPI_status(driver)
     if ( f"{status}" == "cmpuishown" ) :
         # Failed to interact with cookie dialog. if a default TC string can be 
@@ -967,11 +967,11 @@ def encode_TC_string_online(cmpID, purposes, vendors) :
                                                           f"//option[@value={vendor}]")
                     vendor_selector.click()
             succes = True
-        time.sleep(2)
+        time.sleep(2 * TIME_FACTOR)
         # Get the encoded TC string value
         TC_string = TC_string_field.get_attribute("value")
     except Exception as e:
-        print(f"[DEV] exception while encoding TC string with online tool:\n{e}")
+#        print(f"[DEV] exception while encoding TC string with online tool:\n{e}")
         retries += 1
         pass
     return TC_string
@@ -1141,18 +1141,6 @@ def assess_CMP(driver, cmpID, mechanism, identifier, domain, prefix, suffix, TCs
                 driver = configure_crawler()
                 navigate_to_url(driver, domain)
 
-                #attempt: interact with cookie dialog, accepting all, before injecting a different TC string, to test if we can inject succesfully this way...
-#                print("[DEV] start attempt")
-#                time.sleep(1)
-#                url = f"https://{domain}" 
-#                interact_dialog_accept_all(driver, url)
-                # reload page
-#                driver.refresh()
-#                print("[DEV] reloading page")
-#                time.sleep(5)
-
-               # end of attempt  
-
                 if ( args.debug ) :
                     print("[DEB] Injecting TC string")
 
@@ -1164,7 +1152,7 @@ def assess_CMP(driver, cmpID, mechanism, identifier, domain, prefix, suffix, TCs
 
                 # Reload page to simulate returning visit
                 driver.refresh()
-                time.sleep(2)
+                time.sleep(2 * TIME_FACTOR)
 
                 # Retrieve the TC string from __tcfapi, and compare to the 
                 # injected string
@@ -1272,7 +1260,6 @@ def inject_TC_string_cookie(driver, TCstring, identifier, domain) :
     except Exception as e:
         if ( args.debug ) : 
             print(f"[ERR] Exception while injecting cookie ({domain})")
-            print(f"[DEV] {e}")
 
 '''
 Function to inject a TCstring into the Local Storage of the browser, using 
@@ -1455,7 +1442,8 @@ def retrieve_device_storage_disclosure(vendor) :
                 if ( attempts == MAX_RETRIES ) :
                     print(f"[DEB] could not retrieve the cookie disclosure for " + 
                           f"vendor {vendor}")
-                    print(f"\n[DEV] errormessage: \n{e} for url {disclosure_url}\n")
+                    if ( args.debug ) :
+                        print(f"\n[DEB] errormessage: \n{e} for url {disclosure_url}\n")
                 
     else :
         # Disclosure already found in memory
@@ -1518,7 +1506,7 @@ def assess_Vendor(driver, cmpID, mechanism, identifier, domain, prefix, suffix) 
 
                 # Reload page
                 driver.refresh()
-                time.sleep(2)
+                time.sleep(2 * TIME_FACTOR)
 
                 # Check if injection was successful
                 if ( not check_if_injected_matches_returned(driver, TCstring) ) :
@@ -1602,7 +1590,6 @@ def assess_Vendor(driver, cmpID, mechanism, identifier, domain, prefix, suffix) 
                 if ( args.debug ) :
                     print(f"[DEB] Exception during Vendor assessment for cookie " + 
                           f"{parsed_cookie['name']} from domain {parsed_cookie['domain']}")
-                    print(f"[DEV] errormessage: \n{e}")
                 attempts += 1
 
     return assessment_result
@@ -1729,7 +1716,7 @@ def worker_main(url) :
 #        if ( domain != driver.current_url) : 
 #            navigate_to_url(driver, domain) 
 #        print("sleeping")
-#        time.sleep(50)
+#        time.sleep(50 * TIME_FACTOR)
 
         storage_mechanism = "unk"
         detect_TC_in_cookies = detect_TCstring_cookie(driver, domain)
@@ -1834,7 +1821,7 @@ def keyboard_listener(total_to_test, stop_listening) :
                 # Pressing Space should print out status
                 if event.key == keyboard.Key.space :
                     print_status(total_to_test)
-                    time.sleep(1)
+                    time.sleep(1 * TIME_FACTOR)
                 # Pressing Escape should gracefully abort the program
                 if event.key == keyboard.Key.esc :
                     print("[STS] Aborting\n")
@@ -1880,22 +1867,22 @@ def main() :
                     if ( not thread.is_alive() ) :
                         thread.join(90)
                         active_threads.remove(thread)
-             time.sleep(1)
+             time.sleep(1 * TIME_FACTOR)
              thread = threading.Thread(target=worker_main, args=(url,))
              thread.start()
              active_threads.append(thread)
-             time.sleep(0.1)
+             time.sleep(0.1 * TIME_FACTOR)
 
         for thread in active_threads :
-            thread.join(100)
+            thread.join(100 * TIME_FACTOR)
         stop_listening = True
     except KeyboardInterrupt :
         for thread in active_threads :
-            thread.join(90)
+            thread.join(90 * TIME_FACTOR)
 
 main()
 print("[...] Waiting for last thread(s) to finish")
-time.sleep(200)
+time.sleep(200 * TIME_FACTOR)
 
 if ( args.screenshot and len(os.listdir(screenshot_folder)) == 0 ) :
     if ( args.debug ) : print("[DEB] removing screenshot folder, since no " + 
