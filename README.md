@@ -41,3 +41,6 @@ options:
 
 `python3 main.py -l <file> --lang en,fr,de --th 6 -s`
 
+## Interaction
+
+During run of script it can be aborted by pressing **ESC** or it's status can be checked by pressing **Space**.

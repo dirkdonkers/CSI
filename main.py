@@ -32,8 +32,8 @@ from selenium.webdriver.common.action_chains import ActionChains
 # Global variables
 parser: argparse.ArgumentParser()
 args: argparse.Namespace
-version = "0.0.6"
-MAX_RETRIES = 3     #number of retries when exceptions occur
+version = "0.0.7"
+MAX_RETRIES = 3     # number of retries when exceptions occur
 TIME_FACTOR = 1     # variable to speed up script by reducing wait-times
 TCSTRING_MAGIC_HEADER = ""
 TCSTRING_REJECT_ALL = ""
@@ -69,6 +69,7 @@ violating_vendor = 0
 undisclosed_cookie = 0
 vendor_not_in_gvl = 0
 
+# Read files with known identifiers etc
 with open(CMP_SPECIFICATION_FILE) as file:
     CMP_SPECIFICATION = json.load(file)
 
@@ -103,30 +104,43 @@ Function using Argument Parser to pase command line parameters and flags
 def parse_command() :
     global args
     parser = argparse.ArgumentParser(
-                        prog='Consent Injecter',
-                        description='What the program does',
-                        epilog='Text at the bottom of help')
+                        prog='main.py',
+                        description='Proof-of-concept program to detect \
+                        implementations of the Transparency and Consent \
+                        Framework (TCF), and to assess compliance with \
+                        it\'s specification')
                         
     #parser.add_argument('--foo', required=True)
     
     # Input options
-    parser.add_argument('-u', '--url')
-    parser.add_argument('-l', '--list')
+    parser.add_argument('-u', '--url', help='URL of single website to test.')
+    parser.add_argument('-l', '--list', help='Name of file with websites to \
+            test, one on each line.')
     
     # Output options
-    parser.add_argument('-d', '--debug', action='store_true')
-    parser.add_argument('-v', '--verbose', action='store_true')
-    parser.add_argument('-s', '--screenshot', action='store_true')
-    parser.add_argument('-o', '--output')
+    parser.add_argument('-d', '--debug', action='store_true', help='Show debug \
+            output in console.')
+    parser.add_argument('-v', '--verbose', action='store_true', help='Show \
+            verbose output in console.')
+    parser.add_argument('-s', '--screenshot', action='store_true', help='Take \
+            screenshot of websites when interaction with cookie dialog fails, \
+            usefull for finding new strings to search for in cookie dialogs.')
+    parser.add_argument('-o', '--output', help='File in which to store results.')
     
     # Mode options
-    parser.add_argument('--detectOnly', action='store_true')
+    parser.add_argument('--detectOnly', action='store_true', help='Only detect \
+            the implementation of the TCF on a website, perform no further \
+            assessment.')
 
     # Supported language(s) for accept all button detection, accepts comma 
     # separated list from (en,nl,etc..)
-    parser.add_argument('--language', default="en,nl")
+    parser.add_argument('--language', default="en,nl", help='Language(s) of \
+            cookie dialogs to look for, in a comma-separated list. Languages \
+            must be present in ./resource_files/accept_strings.json file. \
+            Default is en,nl.')
 
-    parser.add_argument('-t', '--threads', default=3)
+    parser.add_argument('-t', '--threads', default=3, help='Number of threads \
+            to use.')
 
     args = parser.parse_args()
 
