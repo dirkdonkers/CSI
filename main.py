@@ -1,7 +1,6 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-#from selenium.webdriver.firefox.service import Service
 from selenium.common.exceptions import ElementClickInterceptedException
 import time
 import argparse
@@ -12,49 +11,36 @@ import dns.resolver
 from urllib.parse import urlparse
 import json
 from selenium.webdriver.common.by import By
-#import Console
 import os
 import datetime
 import threading
-#import psutil
-#import concurrent.futures
-#import multiprocessing # werkt niet samen met global variables!
-#import keyboard
 from pynput import keyboard
 import signal
 from urllib.parse import unquote
 from urllib.parse import quote_plus
 import urllib.request
 from selenium.webdriver.common.keys import Keys
-#import requests
 from selenium.webdriver.common.action_chains import ActionChains
+import configparser
 
 # Global variables
+
+version = "0.0.7"
+CONFIG_FILE = r"./config"
+
 parser: argparse.ArgumentParser()
 args: argparse.Namespace
-version = "0.0.7"
-MAX_RETRIES = 3     # number of retries when exceptions occur
-TIME_FACTOR = 1     # variable to speed up script by reducing wait-times
 TCSTRING_MAGIC_HEADER = ""
 TCSTRING_REJECT_ALL = ""
 TCSTRINGS = []
 COMMON_TC_COOKIES = []
-FALSE_INJECTION_POINTS = ["pgConsentCache" ] #TODO: store in file
-IFRAME_IDENTIFIERS = [ "Csp", "Consent window", "FastCMP" ]
-#FALSE_INJECTION_POINTS = [ "mychannels-consentData" ]
 ACCEPT_STRINGS = []
 STORAGE_DISCLOSURES = {}
-URL_ONLINE_ENCODER = "iabtcf.com/#/encode"
-URL_GVL = "https://vendor-list.consensu.org/v3/vendor-list.json"
 STORAGE_DISCLOSURES = {}
 TESTCASES = {}
-CMP_SPECIFICATION_FILE = "resource_files/CMP_specification.json"
-DNS_RESOLVERS_FILE = "resource_files/DNS_resolvers.json"
-DIALOG_ACCEPT_STRINGS_FILE = "resource_files/accept_strings.json"
-COMMON_TC_COOKIES_FILE = "resource_files/common_TC_cookies.json"
-TESTCASES_FILE = "resource_files/testcases.json"
 
-# Global variables to keep count
+# Global variables used as counters
+
 count_TCF_detections = 0 
 count_TCF_non_detections = 0
 count_cookie_identifiers_detected = 0
@@ -69,7 +55,28 @@ violating_vendor = 0
 undisclosed_cookie = 0
 vendor_not_in_gvl = 0
 
-# Read files with known identifiers etc
+# Read main config file
+
+configParser = configparser.ConfigParser()
+configParser.read(CONFIG_FILE)
+
+CMP_SPECIFICATION_FILE = configParser['Config files']['CMP_SPECIFICATION_FILE']
+DNS_RESOLVERS_FILE = configParser['Config files']['DNS_RESOLVERS_FILE']
+DIALOG_ACCEPT_STRINGS_FILE = configParser['Config files']['DIALOG_ACCEPT_STRINGS_FILE']
+COMMON_TC_COOKIES_FILE = configParser['Config files']['COMMON_TC_COOKIES_FILE']
+TESTCASES_FILE = configParser['Config files']['TESTCASES_FILE']
+
+URL_ONLINE_ENCODER = configParser['Online resources']['URL_ONLINE_ENCODER']
+URL_GVL = configParser['Online resources']['URL_GVL']
+
+MAX_RETRIES = int(configParser['Run variables']['MAX_RETRIES'])
+TIME_FACTOR = int(configParser['Run variables']['TIME_FACTOR'])
+
+FALSE_INJECTION_POINTS = configParser['Consistent identifiers']['FALSE_INJECTION_POINTS']
+IFRAME_IDENTIFIERS = configParser['Consistent identifiers']['IFRAME_IDENTIFIERS']
+
+
+# Read other config files with known identifiers etc
 with open(CMP_SPECIFICATION_FILE) as file:
     CMP_SPECIFICATION = json.load(file)
 
@@ -110,8 +117,6 @@ def parse_command() :
                         Framework (TCF), and to assess compliance with \
                         it\'s specification')
                         
-    #parser.add_argument('--foo', required=True)
-    
     # Input options
     parser.add_argument('-u', '--url', help='URL of single website to test.')
     parser.add_argument('-l', '--list', help='name of file with websites to \
