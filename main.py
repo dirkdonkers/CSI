@@ -105,7 +105,7 @@ def parse_command() :
     global args
     parser = argparse.ArgumentParser(
                         prog='main.py',
-                        description='Proof-of-concept program to detect \
+                        description='Proof-of-concept script to detect \
                         implementations of the Transparency and Consent \
                         Framework (TCF), and to assess compliance with \
                         it\'s specification')
@@ -114,32 +114,32 @@ def parse_command() :
     
     # Input options
     parser.add_argument('-u', '--url', help='URL of single website to test.')
-    parser.add_argument('-l', '--list', help='Name of file with websites to \
+    parser.add_argument('-l', '--list', help='name of file with websites to \
             test, one on each line.')
     
     # Output options
-    parser.add_argument('-d', '--debug', action='store_true', help='Show debug \
+    parser.add_argument('-d', '--debug', action='store_true', help='show debug \
             output in console.')
-    parser.add_argument('-v', '--verbose', action='store_true', help='Show \
+    parser.add_argument('-v', '--verbose', action='store_true', help='show \
             verbose output in console.')
-    parser.add_argument('-s', '--screenshot', action='store_true', help='Take \
-            screenshot of websites when interaction with cookie dialog fails, \
+    parser.add_argument('-s', '--screenshot', action='store_true', help='take \
+            screenshot of website when interaction with cookie dialog fails, \
             usefull for finding new strings to search for in cookie dialogs.')
-    parser.add_argument('-o', '--output', help='File in which to store results.')
+    parser.add_argument('-o', '--output', help='file in which to store results.')
     
     # Mode options
-    parser.add_argument('--detectOnly', action='store_true', help='Only detect \
+    parser.add_argument('--detectOnly', action='store_true', help='only detect \
             the implementation of the TCF on a website, perform no further \
             assessment.')
 
     # Supported language(s) for accept all button detection, accepts comma 
     # separated list from (en,nl,etc..)
-    parser.add_argument('--language', default="en,nl", help='Language(s) of \
+    parser.add_argument('--language', default="en,nl", help='language(s) of \
             cookie dialogs to look for, in a comma-separated list. Languages \
             must be present in ./resource_files/accept_strings.json file. \
             Default is en,nl.')
 
-    parser.add_argument('-t', '--threads', default=3, help='Number of threads \
+    parser.add_argument('-t', '--threads', default=3, help='number of threads \
             to use.')
 
     args = parser.parse_args()
