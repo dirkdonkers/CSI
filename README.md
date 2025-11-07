@@ -17,30 +17,25 @@ Based on previous work by [C Lendering](https://github.com/CLendering/IAB-vendor
 # Usage
 
 ```
-usage: main.py [-h] [-u URL] [-l LIST] [-d] [-v] [-s] [-o OUTPUT] [--detectOnly]
-               [--language LANGUAGE] [-t THREADS]
+usage: main.py [-h] [-u URL] [-l LIST] [-d] [-v] [-s] [-o OUTPUT] [--detectOnly] [--language LANGUAGE] [-t THREADS]
 
-Proof-of-concept program to detect implementations of the Transparency and Consent
-Framework (TCF), and to assess compliance with it's specification
+Proof-of-concept script to detect implementations of the Transparency and Consent Framework (TCF), and to assess compliance with it's specification
 
 options:
   -h, --help            show this help message and exit
   -u URL, --url URL     URL of single website to test.
-  -l LIST, --list LIST  Name of file with websites to test, one on each line.
-  -d, --debug           Show debug output in console.
-  -v, --verbose         Show verbose output in console.
-  -s, --screenshot      Take screenshot of websites when interaction with cookie dialog
-                        fails, usefull for finding new strings to search for in cookie
+  -l LIST, --list LIST  name of file with websites to test, one on each line.
+  -d, --debug           show debug output in console.
+  -v, --verbose         show verbose output in console.
+  -s, --screenshot      take screenshot of website when interaction with cookie dialog fails, usefull for finding new strings to search for in cookie
                         dialogs.
   -o OUTPUT, --output OUTPUT
-                        File in which to store results.
-  --detectOnly          Only detect the implementation of the TCF on a website, perform
-                        no further assessment.
-  --language LANGUAGE   Language(s) of cookie dialogs to look for, in a comma-separated
-                        list. Languages must be present in
+                        file in which to store results.
+  --detectOnly          only detect the implementation of the TCF on a website, perform no further assessment.
+  --language LANGUAGE   language(s) of cookie dialogs to look for, in a comma-separated list. Languages must be present in
                         ./resource_files/accept_strings.json file. Default is en,nl.
   -t THREADS, --threads THREADS
-                        Number of threads to use.
+                        number of threads to use.
 ```
 
 ## Single URL Example
