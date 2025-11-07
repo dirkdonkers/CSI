@@ -284,24 +284,13 @@ def configure_crawler():
              chrome_options.BinaryLocation = "/snap/bin/chromium"
 
              chrome_options.add_argument("--enable-javascript")
-#             chrome_options.add_argument("--disk-cache-size=0")
-#             chrome_options.add_argument("--start-maximized");
-#             chrome_options.page_load_strategy = 'none'
-#             chrome_options.page_load_strategy = 'eager'
-#             firefox_options.binary_location = "/usr/bin/firefox"
-#    chrome_options.add_argument("--disable-search-engine-choice-screen") #specifiek voor chrome + windows 
-#    chrome_options.add_argument('--ignore-certificate-errors')
-   
-#    chrome_options.add_experimental_option('excludeSwitches', ['enable-logging'])
-    #service.creationflags = CREATE_NO_WINDOW
-#             chrome_options.add_argument('log-level=3')
-             #options to accept third party cookies:
+
+# options to accept third party cookies:
              chrome_options.add_experimental_option("prefs", {"profile.default_content_setting_values.cookies": 1})
              chrome_options.add_experimental_option("prefs", {"profile.block_third_party_cookies": False})
 
-             # enable BiDi to access third party cookies
+# enable BiDi to access third party cookies
              chrome_options.enable_bidi = True
-#             "profile.block_third_party_cookies": false
              driver = webdriver.Chrome(service=service, options=chrome_options)
              driver.set_page_load_timeout(30)
              driver.command_executor.set_timeout(90)
