@@ -1,8 +1,8 @@
 # CSI
 
-Proof-of-concept (PoC) implementation of Consent Injection. Used to demonstrate the posibility to automate injection of consent strings in a browser using Selenium Webdriver, to assess compliance with the Transparency & Consent Framework (TCF) version 2.2.
+Proof-of-concept implementation of Consent Injection. Used to demonstrate the posibility to automate injection of consent strings in a browser using Selenium Webdriver, to assess compliance with the Transparency & Consent Framework (TCF) version 2.2.
 
-Based on previous work by [C Lendering](https://github.com/CLendering/IAB-vendor-compliance). Thesis with research performed with this PoC will be made available later.
+Based on previous work by [C Lendering](https://github.com/CLendering/IAB-vendor-compliance). 
 
 # Installation
 
@@ -10,7 +10,7 @@ Based on previous work by [C Lendering](https://github.com/CLendering/IAB-vendor
 
 `sudo apt install python3-pip python3-dnspython python3-selenium python3-pynput npm`
 
-`npm install -g @iabtechlabtcf/cli`
+`sudo npm install -g @iabtechlabtcf/cli`
 
 `git clone https://github.com/dirkdonkers/CSI.git`
 
