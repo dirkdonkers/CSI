@@ -1,0 +1,67 @@
+# Configuration file for Consent String Injection script.
+
+###### Run variables ######
+# Variables to control the runtime of the script.
+
+# Number of times to attempt to load a page when it does not load the first
+# time, or an exception occurs.
+
+MAX_RETRIES = 3
+
+# Factor with wich all sleep statements are multiplicated, can be adjusted 
+# to speed up the script.
+
+TIME_FACTOR = 1
+
+###### Consistent identifiers  ######
+# Some identifiers from Consent and Management Platform (CMP) implementations,
+# where they are required for successful interaction with a cookie dialog.
+
+# Consent storage locations that have been found not to be suitable for
+# injection of (self-encoded) consent strings. These will be ignored during
+# the detection phase, and therefore not used for injection attempts.
+
+FALSE_INJECTION_POINTS = ["pgConsentCache" ]
+
+# Identifiers by which CMP implementations served in an iFrame can be 
+# detected.
+
+IFRAME_IDENTIFIERS = [ "Csp", "Consent window", "FastCMP" ]
+
+###### Online resources ######
+# Online files or services used during the run of the script.
+
+# URL for online Transparancy & Consent (TC) string encoder provided by 
+# IAB Tech Lab.
+
+URL_ONLINE_ENCODER = "iabtcf.com/#/encode"
+
+# URL for (most recent) Global Vendor List (GVL)
+
+URL_GVL = "https://vendor-list.consensu.org/v3/vendor-list.json"
+
+###### Resource files ######
+# Files with data loaded at run-time.
+
+# File with implementation specifics of common CMPs.
+
+CMP_SPECIFICATION_FILE = "./config.d/CMP_specification.json"
+
+# File with DNS servers that are used to filter out inapropriate or
+# malicious domains.
+
+DNS_RESOLVERS_FILE = "./config.d/DNS_resolvers.json"
+
+# File with common strings found on the "accept all" button of a
+# cookie dialog, in various languages.
+
+DIALOG_ACCEPT_STRINGS_FILE = "./config.d/accept_strings.json"
+
+# File with common identifiers of cookies that are used for consent
+# storage.
+
+COMMON_TC_COOKIES_FILE = "./config.d/common_TC_cookies.json"
+
+# File with testcases to run during the vendor assessment phase.
+
+TESTCASES_FILE = "./config.d/testcases.json"
