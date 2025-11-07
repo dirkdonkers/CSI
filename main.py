@@ -96,7 +96,7 @@ try:
         GLOBAL_VENDOR_LIST = json.load(url)
 except urllib.error.URLError :
     # First connection to internet, show error and exit if unsucessful
-    print(f"[ERR] error retrieving GVL, do we have an internet connection?")
+    print_output("error",f"error retrieving GVL, do we have an internet connection?")
     exit(0)
 
 with open(TESTCASES_FILE) as file:
@@ -151,49 +151,46 @@ def parse_command() :
 
     # TODO: (if verbose or debug) print version?
 
-    if ( args.debug ) :
-        print("[DEB] Enabling debug output.")
-        print("[DEB] Parsing command")
-        if ( args.verbose ) :
-            print("[DEB] Verbose output is enabled")
+    print_output("debug","Enabling debug output.")
+    print_output("debug","Parsing command")
+    print_output("verbose","Verbose output is enabled")
         #verbosity
-        if ( args.url != None ) :
-            print(f"[DEB] URL read from input: {args.url}" )
-        if ( args.list != None ) :
-            print(f"[DEB] Reading URLs from input file: {args.list}" )
-        if ( args.output != None ) :
-            print(f"[DEB] saving output in file: {args.output}" )
-        if ( args.screenshot ) :
-            print(f"[DEB] saving screenshots when interaction with cookie dialog fails")
-        if ( args.detectOnly ) :
-            print("[DEB] Detect only mode is enabled, performing no assesment of " +
-                  "CMPs or Vendors.")
-        print(f"[DEB] Running with {args.threads} threads")
+    if ( args.url != None ) :
+        print_output("debug",f"URL read from input: {args.url}" )
+    if ( args.list != None ) :
+        print_output("debug",f"Reading URLs from input file: {args.list}" )
+    if ( args.output != None ) :
+        print_output("debug",f"saving output in file: {args.output}" )
+    if ( args.screenshot ) :
+        print_output("debug",f"saving screenshots when interaction with cookie dialog fails")
+    if ( args.detectOnly ) :
+        print_output("debug","Detect only mode is enabled, performing no assesment of " +
+                     "CMPs or Vendors.")
+        print_output("debug",f"Running with {args.threads} threads")
 
 '''
 Function to verify a valid command was supplied with all needed parameters, and 
 check if tcstring utility is available
 '''
 def validate_command():
-    if ( args.debug ) :
-        print("[DEB] Validating command")
+    print_output("debug","Validating command")
     # Single url, or input file must be present, but not both, file should exist
     if ( args.url == None and args.list == None ) :
-        print("[ERR] -u or -l option must be used")
+        print_output("error","-u or -l option must be used")
         sys.exit("Invalid command.")
     if ( args.url != None and args.list != None ) :
-        print("[ERR] -u and -l option cannot both be used")
+        print_output("error","-u and -l option cannot both be used")
         sys.exit("Invalid command.")
     if ( args.list != None and not os.path.isfile(args.list) ) :
-        print("[ERR] Supplied input file does not exist")
+        print_output("error","Supplied input file does not exist")
         sys.exit("Invalid command.")
     if ( args.output != None and os.path.isfile(args.output) ) :
-        print(f"[ERR] Supplied output file already exists")
+        print_output("error",f"Supplied output file already exists")
         sys.exit("Invalid command.")
     # Check if tcstring utility is installed
     output = os.popen(f"tcstring 2>/dev/stdout").read()
     if not ( output == "Please pass a TC string\n" ) :
-        print(f"[ERR] tcstring utility seems not to be installed, please " +
+        print_output("error",f"tcstring utility seems not to be installed, please " +
               "install first")
         sys.exit("Invalid command.")
     # TODO: check if selenium is installed?
@@ -268,6 +265,20 @@ def increment_vendor_not_in_gvl():
     with threadLock13 : vendor_not_in_gvl += 1
 
 '''
+Function to print output to the console, depending on flags
+given to the script
+'''
+def print_output(type, message):
+    if ( type == "debug" and args.debug ) :
+        print(f"[DEB] {message}")
+    if ( type == "verbose" and ( args.verbose or args.debug ) ) :
+        print(f"[VER] {message}")
+    if ( type == "error" ) :
+        print(f"[ERR] {message}")
+    if ( type == "finding" ) :
+        print(f"[!!!] {message}")
+
+'''
 Function that configures a new crawler for each URL visit
 '''
 def configure_crawler():
@@ -297,27 +308,26 @@ def configure_crawler():
              configured = True
              consecutive_errors = 0
         except Exception as e : 
-            print(f"[ERR] Exception while configuring crawler. ({consecutive_errors}" +
+            print_output("error","Exception while configuring crawler. ({consecutive_errors}" +
                   f"/{max_consecutive_errors})")
 
-            if ( args.debug ) : print(f"[DEB] Errormessage: {e}")
+            print_output("debug",f"Errormessage: {e}")
             time.sleep(10 * TIME_FACTOR)
             consecutive_errors += 1 
             if ( consecutive_errors >= max_consecutive_errors ): 
-                print(f"[ERR] {max_consecutive_errors} consecutive errors while " +
+                print_output("error",f"{max_consecutive_errors} consecutive errors while " +
                       "configuring crawler, killing all chrome processes")
                 os.popen(f"killall chrome")
                 consecutive_erros = 0 
-                if ( args.debug ) : 
-                    print(f"[DEB] Errormessage of last exception: \n {e} ")
+                print_output("debug",f"Errormessage of last exception: \n {e} ")
     return driver
 
 def stop_driver(driver) :
     try:
         driver.quit()
     except Exception as e: 
-        print(f"[ERR] Exception while stopping driver: \n{e}")
-        if ( args.debug ) : print(f"[DEB] Exception while stopping driver: \n{e}")
+        print_output("error",f"Exception while stopping driver: \n{e}")
+        print_output("debug",f"Exception while stopping driver: \n{e}")
 
 '''
 Read accept strings from json file, using the configured language from the command. 
@@ -345,14 +355,15 @@ def prepare_url_list() :
     url_list = []
     if ( args.list == None ) :
         url_list = [ args.url ] 
-        if ( args.debug ) : print(f"[DEB] Placed url from command in list")
+        print_output("debug",f"Placed url from command in list")
     else :
         with open (args.list) as file :
             for line in file :
                 url_list.append(line.strip())
-        if ( args.debug ) : print(f"[DEB] Placed urls from file in list")
+        print_output("debug",f"Placed urls from file in list")
         if ( len(url_list) == 0 ) :
-            sys.exit(f"[ERR] Supplied input file did not contain any URLs")
+            print_output("error",f"Supplied input file did not contain any URLs")
+            sys.exit()
     return url_list
 
 '''
@@ -386,12 +397,11 @@ def filter_unsafe_domain(domain) :
             if ( result[0].to_text() == '0.0.0.0' ) :
                 safe = False
                 increment_filtered_out()
-                if ( args.debug ) : 
-                    print(f"[DEB] Domain {domain} was filtered out by domain name " +
+                print_output("debug",f"Domain {domain} was filtered out by domain name " +
                           f"server {name}")
                 break
         except Exception :
-            if ( args.debug ) : print(f"[DEB] Error resolving domain name")
+            print_output("debug",f"Error resolving domain name")
     return safe
 
 '''
@@ -417,19 +427,16 @@ def detect_tcf(driver, domain) :
             # Detect __tcfapi function using Selenium scripting capabilities
             if ( driver.execute_script("return typeof window.__tcfapi") == "function" ) :
                 TCF_detected = True
-                if ( args.verbose or args.debug ) : 
-                    print(f"[VER] TCF detected on URL {domain}")
-                if ( args.debug ) :
-                    print("[DEB] Used detection method: __tcfapi function")
+                print_output("verbose",f"TCF detected on URL {domain}")
+                print_output("debug","Used detection method: __tcfapi function")
             else:
-                if ( args.debug ) : print(f"[DEB] did not detect TCF")
+                print_output("debug",f"did not detect TCF")
             succes = True
         except Exception as e :
             if ( RETRIES == MAX_RETRIES ) :
-                print(f"[ERR] Errors occured {RETRIES} times while detecting TCF " +
+                print_output("error",f"Errors occured {RETRIES} times while detecting TCF " +
                       f"({domain})")
-                if ( args.debug ) : 
-                    print(f"[DEB] Errormessage: \n {e}")
+                print_output("debug",f"Errormessage: \n {e}")
             RETRIES += 1
     if ( not succes ) :
         increment_error()
@@ -460,7 +467,7 @@ def isTCString(string, URL_encoding = False ) :
             # "encoded" is present, the utility successfully decoded the TC string. 
             decoded = decode_TC_string(f"{sanitized_string}")
             if ( "encoded" in decoded ) :
-                if ( args.debug ) : print("[DEB] TC string detected")
+                print_output("debug","TC string detected")
                 TCstring_detected = True
         except Exception :
             pass
@@ -521,11 +528,10 @@ def detect_TCstring_cookie(driver, url) :
     try:
         # Use Selenium driver to retrieve cookies in JSON format
         cookies = driver.get_cookies()
-        if ( args.debug ) : print("[DEB] Detected cookies: ")
+        print_output("debug","Detected cookies: ")
         for cookie in cookies :
             parsed_cookie = json.loads(json.dumps(cookie))
-            if ( args.debug ) : 
-                print(f"      {parsed_cookie['name']}")
+            print_output("debug",f"      {parsed_cookie['name']}")
             if ( parsed_cookie['name'] in COMMON_TC_COOKIES ) :
                 test_string_for_TC_string = isTCString(parsed_cookie['value'])
                 if ( test_string_for_TC_string[0] ) :
@@ -537,16 +543,13 @@ def detect_TCstring_cookie(driver, url) :
                     prefix = test_string_for_TC_string[3]
                     suffix = test_string_for_TC_string[4]
                     increment_identifiers_detected()
-                    if ( args.debug or args.verbose ) : 
-                        print(f"[VER] Cookie with common identifier " +
+                    print_output("verbose",f"Cookie with common identifier " +
                               f"'{TCstring_cookie}' found ({url})")
-                    if ( args.debug ) : 
-                        print(f"[DEB] Value cookie: {parsed_cookie['value'][:1000]}")
+                    print_output("debug",f"Value cookie: {parsed_cookie['value'][:1000]}")
                     break
                 else :
-                    if ( args.debug ) : 
-                        print(f"[DEB] {TCstring_cookie} however does not contain " +
-                              f"valid TC String ({url})")
+                    print_output("debug",f"{TCstring_cookie} however does not contain " +
+                                f"valid TC String ({url})")
     # TCstring not found in cookie with common name, continue checking all cookies        
         for cookie in cookies :
             if ( not TCstring_cookie_detected ) :
@@ -560,20 +563,17 @@ def detect_TCstring_cookie(driver, url) :
                     suffix = test_string_for_TC_string[4]
                     TCstring_cookie = parsed_cookie["name"]
                     increment_identifiers_detected()
-                    if ( args.debug or args.verbose ) : 
-                        print(f"[VER] Cookie with identifier '{TCstring_cookie}' " +
+                    print_output("verbose",f"Cookie with identifier '{TCstring_cookie}' " +
                               f"contains TCString ({url})")
-                    if ( args.debug ) : 
-                        print(f"[DEB] Value cookie: {parsed_cookie['value'][:1000]}")
+                    print_output("debug",f"Value cookie: {parsed_cookie['value'][:1000]}")
         TCstring_during_detection = getTCstring_via_API(driver)
-        if ( args.debug ) :
-            print(f"[DEB] TC string retrieved from __tcfapi: " +
+        print_output("debug",f"TC string retrieved from __tcfapi: " +
                   f"{TCstring_during_detection} ({url})")
     # if cookie with TC string still not found, maybe check also cookies marked as false injection points..
     except Exception as e : 
-        print(f"[ERR] Exception while reading cookies ({url})")
+        print_output("error",f"Exception while reading cookies ({url})")
 
-        if ( args.debug ) : print(f"[DEB] Errormessage: \n {e}")
+        print_output("debug",f"Errormessage: \n {e}")
     return (TCstring_cookie, additional_data, URL_encoding, prefix, suffix, TCstring_during_detection)
 
 '''
@@ -595,8 +595,7 @@ def detect_TCstring_in_Local_Storage(driver, url) :
     URL_encoding = False
     TCstring_during_detection = ""
 
-    if ( args.debug ) : 
-        print("[DEB] No cookie containing TCstring found, checking Local Storage " +
+    print_output("debug","No cookie containing TCstring found, checking Local Storage " +
               f"({url}) \n[DEB] Local Storage items: ")
     try: 
         # Retrieve all keys of Local Storage items
@@ -606,7 +605,7 @@ def detect_TCstring_in_Local_Storage(driver, url) :
             # return the value, until a TC string is found
             if ( key not in FALSE_INJECTION_POINTS and not TCstring_LS_detected ) :
                 try: 
-                    if (args.debug) : print(f"      {key}")
+                    print_output("debug",f"      {key}")
                     value = driver.execute_script(f"return window.localStorage" +
                                               f".getItem('{key}');")
                     test_string_for_TC_string = isTCString(value)
@@ -621,20 +620,19 @@ def detect_TCstring_in_Local_Storage(driver, url) :
                         prefix = test_string_for_TC_string[3]
                         suffix = test_string_for_TC_string[4]
                         increment_identifiers_detected()
-                        if ( args.debug or args.verbose ) : 
-                            print(f"[VER] Local Storage item with key '{key}' contains " +
+                        print_output("verbose",f"Local Storage item with key '{key}' contains " +
                                   f"TCString ({url})")
-                        if ( args.debug ) : print(f"[DEB] Value item: {value[:1000]}")
+                        print_output("debug",f"Value item: {value[:1000]}")
                 except Exception :
                     pass
 
-        if ( not TCstring_LS_detected and args.debug ) : 
-            print(f"[DEB] No TCstring found in Local Storage ({url})")
+        if ( not TCstring_LS_detected ) : 
+            print_output("debug",f"No TCstring found in Local Storage ({url})")
         TCstring_during_detection = getTCstring_via_API(driver)
 
     except Exception as e :
-        print(f"[ERR] Exception occured while reading Local Storage ({url})")
-        if ( args.debug ) : print(f"[DEB] Errormessage: \n{e}")
+        print_output("error",f"Exception occured while reading Local Storage ({url})")
+        print_output("debug",f"Errormessage: \n{e}")
     return (TCstring_LS, additional_data, URL_encoding, prefix, suffix, TCstring_during_detection)
 
 '''
@@ -657,12 +655,11 @@ def identify_accept_button_shadow_host(driver, host_method, host_value, button_m
         if ( button_method == "class_name" ) :
             accept_button = shadow_root.find_element(By.CLASS_NAME, button_value)
 #        if ( button_method == "css" ) :
-#            print("trying css")
+#            print("[DEV] trying css")
 #            accept_button = shadow_root.find_element(By.CSS_SELECTOR, button_value)
         return accept_button
     except Exception as e :
-        if ( args.debug ) :
-            print(f"[DEB] Exception while identifying acceptbutton in shadow " +
+        print_output("debug",f"Exception while identifying acceptbutton in shadow " +
                   f"root ({url}): \n{e}")
 
 '''
@@ -677,8 +674,7 @@ def identify_accept_button(driver, button_method, button_value) :
             accept_button = driver.find_element(By.CLASS_NAME, button_value)
         return accept_button
     except Exception as e :
-        if ( args.debug ) :
-            print(f"[DEB] Exception while identifying acceptbutton ({url}): \n{e}")
+        print_output("debug",f"Exception while identifying acceptbutton ({url}): \n{e}")
 
 '''
 Function to interact with a cookiedialog if available. Will search for common 
@@ -696,8 +692,7 @@ def interact_dialog_accept_all(driver, url) :
         try :
             identifier = driver.find_element(By.XPATH,"//*[contains(@src,'" + 
                                              SPECIFICATION['source_identifier'] + "')]") 
-            if ( args.debug ) : 
-                print(f"[DEB] cmp identified by {SPECIFICATION['source_identifier']}")
+            print_output("debug",f"CMP identified by {SPECIFICATION['source_identifier']}")
             if ( SPECIFICATION['uses-shadow-host'] ) : 
                  # CMP is known to use shadowroot
                  accept_button = identify_accept_button_shadow_host(driver, SPECIFICATION['shadow-root']['type'], SPECIFICATION['shadow-root']['value'], SPECIFICATION['accept-button']['type'], SPECIFICATION['accept-button']['value'])
@@ -733,8 +728,7 @@ def interact_dialog_accept_all(driver, url) :
                     xpath = f"//{element}[contains(translate(text(), '{uppercase}'" + \
                             f", '{lowercase}'), '{string}')]"
                     accept_button = driver.find_element(By.XPATH, xpath)
-                    if ( args.debug ) : 
-                        print(f"[DEB] Found button with string: {string}")
+                    print_output("debug",f"Found button with string: {string}")
                     accept_button.click()
                     interacted = True
                     break
@@ -749,7 +743,7 @@ def interact_dialog_accept_all(driver, url) :
             try :
                 iframe = driver.find_element(By.XPATH,"//iframe[contains(@src,'" + 
                                              iframe_identifier + "')]")
-                if ( args.debug ) : print("[DEB] Searching for accept button in iframe 1")
+                print_output("debug","Searching for accept button in iframe 1")
                 driver.switch_to.frame(iframe)
                 elements = driver.find_elements(By.XPATH, '//button')
                 for element in elements:
@@ -758,8 +752,7 @@ def interact_dialog_accept_all(driver, url) :
    #                     for string in ACCEPT_STRINGS :
                             text_lower = element.text.lower()
                             if ( string in text_lower ) :
-                                if ( args.debug ) : 
-                                    print(f"[DEB] Found button with string: {string}")
+                                print_output("debug",f"Found button with string: {string}")
                                 element.click()
                                 interacted = True
                                 driver.switch_to.default_content()
@@ -773,7 +766,7 @@ def interact_dialog_accept_all(driver, url) :
                 iframe = driver.find_element(By.XPATH,"//iframe[contains(@title,'" + 
                                              iframe_identifier + "')]")
                 driver.switch_to.frame(iframe)
-                if ( args.debug ) : print("[DEB] Searching for accept button in iframe")
+                print_output("debug","Searching for accept button in iframe")
                 elements = driver.find_elements(By.XPATH, '//button')
             
                 for element in elements:
@@ -782,8 +775,7 @@ def interact_dialog_accept_all(driver, url) :
 #                        for string in ACCEPT_STRINGS :
                             text_lower = element.text.lower()
                             if ( string in text_lower ) :
-                                if ( args.debug ) : 
-                                    print(f"[DEB] Found button with string: {string}")
+                                print_output("debug",f"Found button with string: {string}")
                                 element.click()
                                 interacted = True
                                 driver.switch_to.default_content()
@@ -796,8 +788,7 @@ def interact_dialog_accept_all(driver, url) :
  
     # No button was found to interact with
     if ( not interacted ) :
-        if ( args.debug or args.verbose ) : 
-            print(f"[ERR] Failed to interact with cookie dialog. ({url})")
+        print_output("verbose",f"Failed to interact with cookie dialog. ({url})")
         if ( args.screenshot ) :
             take_screenshot(driver, url)
 
@@ -810,13 +801,11 @@ def interact_dialog_accept_all(driver, url) :
         # We return failed interaction to prevent a false positive detection 
         # for server-side storage mechanism, since the default TC string will 
         # be found during detection and injected when assessing the CMP. 
-        if ( args.debug or args.verbose ) :
-            print(f"[ERR] Failed to interact with cookie dialog, status is " +
+        print_output("verbose",f"Failed to interact with cookie dialog, status is " +
                   f"\"cmpuishown\". ({url})")
         interacted = False
     else :
-        if ( args.debug ) :
-            print(f"[DEB] __tcfapi has returned status: {status}.")
+        print_output("debug",f"__tcfapi has returned status: {status}.")
     return interacted
 
 '''
@@ -833,9 +822,9 @@ def identify_CMP(driver) :
     except Exception as e :
         if ( args.debug ) :
             if ( "window.__tcfapi is not a function" in f"{e}" ): 
-                print(f"[DEB] __tcfapi function not found, possible bot-detection?!")
+                print_output("debug",f"__tcfapi function not found, possible bot-detection?!")
             else :
-                print(f"[DEB] Exception while retrieving CMP ID via __tcfapi, " +
+                print_output("debug",f"Exception while retrieving CMP ID via __tcfapi, " +
                       f"errormessage: {e}")
     return CMP_ID
 
@@ -855,9 +844,9 @@ def getTCstring_via_API(driver) :
     except Exception as e:
         if ( args.debug ) :
             if ( "window.__tcfapi is not a function" in f"{e}" ): 
-                print(f"[DEB] __tcfapi function not found, possible bot-detection?!")
+                print_output("debug",f"__tcfapi function not found, possible bot-detection?!")
             else :
-                print(f"[DEB] Exception while retrieving TC string via __tcfapi, " +
+                print_output("debug",f"Exception while retrieving TC string via __tcfapi, " +
                       f"errormessage: {e}")
     return retrieved_TC_string
 
@@ -875,8 +864,8 @@ def getTCFAPI_status(driver) :
             parsed_output = json.loads(json.dumps(output_json))
             retrieved_status = parsed_output['eventStatus']
     except Exception as e: 
-        if ( args.debug ) : print(f"Exception while getting status from __tcfapi," +
-                                  f" \nerrormessage: {e}")
+        print_output("debug",f"Exception while getting status from __tcfapi," +
+                    f" \nerrormessage: {e}")
         pass
     return retrieved_status
  
@@ -905,8 +894,7 @@ def get_TCstring(cmpID, purposes, vendors) :
         # TCstring with cmpID and configuration is present in TCSTRINGS list, we 
         # can reuse it
         TCstring = tcstring[0][3]
-        if ( args.debug ) : 
-            print(f"[DEB] TCstring with cmpID \"{cmpID}\", purposes '{purposes}' " +
+        print_output("debug",f"TCstring with cmpID \"{cmpID}\", purposes '{purposes}' " +
                   f"and vendors '{vendors}' reused")
     return TCstring
     
@@ -921,7 +909,7 @@ def encode_TC_string_online(cmpID, purposes, vendors) :
     try : 
         driver = configure_crawler()
         navigate_to_url(driver, url)
-        if ( args.debug ) : print(f"[DEB] encoding TC string with online tool")
+        print_output("debug",f"Encoding TC string with online tool")
 
         while ( not succes and retries < MAX_RETRIES ) :
             # Set cmpID to match with the CMP implementation
@@ -1008,7 +996,7 @@ def assess_CMP(driver, cmpID, mechanism, identifier, domain, prefix, suffix, TCs
     finished = False
     injection_success = True
     default_set_TC_string = ""
-    if ( args.debug ) : print(f"\n[DEB] Starting CMP assessment")
+    print_output("debug",f"Starting CMP assessment")
     
     # Start step 1: Load the page and see if a TCstring is present before interaction
     while ( attempts < MAX_RETRIES and not finished ) :
@@ -1027,12 +1015,10 @@ def assess_CMP(driver, cmpID, mechanism, identifier, domain, prefix, suffix, TCs
             default_set_TC_string = retrieved_TC_string
 
             if ( retrieved_TC_string != "" ) :
-                if ( args.verbose or args.debug ) :
-                    print(f"[VER] TCstring is returned by __tcfapi before " +
+                print_output("verbose",f"TCstring is returned by __tcfapi before " +
                           "interaction with cookie dialog. We should check the " +
                           f"consent encoded in this default TCstring. ({domain})")
-                if ( args.debug ) : 
-                    print(f"[DEB] Returned TCstring is: {retrieved_TC_string}")
+                print_output("debug",f"Returned TCstring is: {retrieved_TC_string}")
                 # Check that the retrieved TC string is not the same as the one 
                 # found during the detection phase. If it is the same, the storage 
                 # persisted after starting a new browser instance. This could 
@@ -1040,7 +1026,7 @@ def assess_CMP(driver, cmpID, mechanism, identifier, domain, prefix, suffix, TCs
                 possible_persistance = ""
                 if ( retrieved_TC_string == TCstring_during_detection ) :
                     if ( args.debug ) :
-                        print(f"[ERR] TC string retrieved before injection is " +
+                        print_output("debug",f"TC string retrieved before injection is " +
                               "equal to the TC string found during the detection " +
                               "phase. The TC string persisted after starting a new " +
                               "browser instance, this could indicate a server side " +
@@ -1048,7 +1034,7 @@ def assess_CMP(driver, cmpID, mechanism, identifier, domain, prefix, suffix, TCs
                               f"with the dialog during detection failed. ({domain})")
                         possible_persistance = "(or persisted) "
                         status = getTCFAPI_status(driver)
-                        print(f"[DEB] __tcfapi has retuned status: {status}.")
+                        print_output("debug",f"__tcfapi has retuned status: {status}.")
                     assessment_result = assessment_result + " same TC string " + \
                           "returned before injection as during detection after " + \
                           "interaction (server-side storage; failed interaction " + \
@@ -1072,24 +1058,21 @@ def assess_CMP(driver, cmpID, mechanism, identifier, domain, prefix, suffix, TCs
                 allowed_purposes = assert_result[1]
 
                 if ( no_vendors_allowed and no_purposes_allowed ) : 
-                    if ( args.debug or args.verbose ) :
-                        print(f"[VER] Default set {possible_persistance}TCstring " +
+                    print_output("verbose",f"Default set {possible_persistance}TCstring " +
                               "does not give consent for any vendors or purposes " +
                               f"({domain})")
                 elif ( no_vendors_allowed and not no_puroses_allowed ) :
-                    if ( args.debug or args.verbose ) :
-                        print(f"[VER] Default set {possible_persistance}TCstring " +
+                    print_output("verbose",f"Default set {possible_persistance}TCstring " +
                               "does not give consent for any vendors, but does " + 
                               f"for the following purposes: {allowed_purposes} " +
                               f"({domain}).")
                 elif ( not no_vendors_allowed and no_purposes_allowed ) :
-                    if ( args.debug or args.verbose ) :
-                        print(f"[VER] Default set {possible_persistance}TCstring " + 
+                    print_output("verbose",f"Default set {possible_persistance}TCstring " + 
                               "does not give consent for any purposes, but does " +
                               f"for the following vendors: {allowed_vendors} " +
                               f"({domain}).")
                 else :
-                    print(f"[!!!] TCstring set without interaction " +
+                    print_output("finding",f"TCstring set without interaction " +
                           f"{possible_persistance}gives consent to the following " +
                           f"vendors: {allowed_vendors}\nand the following purposes: " +
                           f"{allowed_purposes} ({domain}).\nThis should be " +
@@ -1109,13 +1092,11 @@ def assess_CMP(driver, cmpID, mechanism, identifier, domain, prefix, suffix, TCs
             # is not yet interacted with. TCstring therefore not available via 
             # API call
             if ( 'parsed_output' in locals() and parsed_output['eventStatus'] == "cmpuishown" ) :
-                if ( args.debug ) :
-                    print(f"[DEB] tcfapi returned eventStatus of \"tcloaded\", " + 
+                print_output("debug",f"tcfapi returned eventStatus of \"tcloaded\", " + 
                           "TCstring not yet available via API call")
                 finished = True
             else :
-                if ( args.debug ) : 
-                    print(f"[DEB] Exception during CMP assessment, errormessage:\n{e}")
+                print_output("debug",f"Exception during CMP assessment, errormessage:\n{e}")
             attempts += 1
 
     # No need to proceed if a server-side storage mechanism is suspected
@@ -1149,8 +1130,7 @@ def assess_CMP(driver, cmpID, mechanism, identifier, domain, prefix, suffix, TCs
                 driver = configure_crawler()
                 navigate_to_url(driver, domain)
 
-                if ( args.debug ) :
-                    print("[DEB] Injecting TC string")
+                print_output("debug","Injecting TC string")
 
                 if ( mechanism == "cookie" ) :
                     inject_TC_string_cookie(driver, TCstring_wrapped, identifier, domain)
@@ -1171,7 +1151,7 @@ def assess_CMP(driver, cmpID, mechanism, identifier, domain, prefix, suffix, TCs
                 if ( retrieved_TC_string == "" ) :
                     if ( args.debug ) : 
                         status = getTCFAPI_status(driver)
-                        print(f"[DEB] __tcfapi returned an empty string after " +
+                        print_output("debug",f"__tcfapi returned an empty string after " +
                               "injection, injection failed. \n      __tcfapi " +
                               f"returned status: {status}.")
                     increment_failed_injection()
@@ -1181,21 +1161,18 @@ def assess_CMP(driver, cmpID, mechanism, identifier, domain, prefix, suffix, TCs
                     if ( status == "cmpuishown" ) :
                         # Cookie dialog is shown after injection, injection has 
                         # failed
-                        if ( args.debug ) : 
-                            print(f"[DEB] __tcfapi returned the default TC string " +
+                        print_output("debug",f"__tcfapi returned the default TC string " +
                                   "after injection, injection failed.\n      " +
                                   f"__tcfapi returned status: {status}.")
                         increment_failed_injection()
                         injection_success = False
                     else :
-                        if ( args.debug ) : 
-                            print(f"[DEB] __tcfapi returned the default TC string " +
+                        print_output("debug",f"__tcfapi returned the default TC string " +
                                   "after injection, but __tcfapi returned status: " +
                                   f"{status}. Attempting to proceed.")
  
                 elif ( retrieved_matches_injected ) :
-                    if ( args.debug ) :
-                        print("[DEB] Injected TCstring matches TCstring retrieved " +
+                    print_output("debug","Injected TCstring matches TCstring retrieved " +
                               "with __tcfapi call")
  
                 else :
@@ -1214,28 +1191,25 @@ def assess_CMP(driver, cmpID, mechanism, identifier, domain, prefix, suffix, TCs
                     allowed_purposes = assert_result[1]
 
                     if ( no_vendors_allowed and no_purposes_allowed ) :
-                        if ( args.debug ) :
-                            print(f"[DEB] Injected TCstring not returned by " +
+                        print_output("debug",f"Injected TCstring not returned by " +
                                   "__tcfapi, returned string allows no vendors " +
                                   "or purposes")
                         injection_success = False
                         increment_failed_injection()
                     elif ( no_vendors_allowed and not no_purposes_allowed ) :
-                        if ( args.debug ) :
-                            print(f"[DEB] Injected TCstring not returned by " +
+                        print_output("debug",f"Injected TCstring not returned by " +
                                   "__tcfapi, returned string allows no vendors, " +
                                   f"but does allow purposes: {allowed_purposes}")
                         injection_success = False
                         increment_failed_injection()
                     elif ( not no_vendors_allowed and no_purposes_allowed ) :
-                        if ( args.debug ) :
-                            print(f"[DEB] Injected TCstring not returned by " +
+                        print_output("debug",f"Injected TCstring not returned by " +
                                   "__tcfapi, returned string allows no purposes, " +
                                   f"but does allow vendors: {allowed_vendors}")
                         injection_success = False
                         increment_failed_injection()
                     elif ( not no_vendors_allowed and not no_purposes_allowed ) :
-                        print(f"[!!!] Injected TCstring not returned by __tcfapi, " +
+                        print_output("finding",f"Injected TCstring not returned by __tcfapi, " +
                               f"returned string does allow purposes: {allowed_purposes} " +
                               f"and vendors: {allowed_vendors}, this should be " +
                               f"investigated! ({domain})")
@@ -1244,14 +1218,13 @@ def assess_CMP(driver, cmpID, mechanism, identifier, domain, prefix, suffix, TCs
                         "with consent for vendors and purposes returned by tcfapi " + \
                         "after injection;"
 
-                if ( args.debug ) :
-                    print(f"[DEB] Injected TCstring: {TCstring} \n      Returned " +
+                print_output("debug",f"Injected TCstring: {TCstring} \n      Returned " +
                           f"TCstring: '{retrieved_TC_string}'")
-                    print(f"[DEB] __tcfapi returned status: {getTCFAPI_status(driver)}.")
+                print_output("debug",f"__tcfapi returned status: {getTCFAPI_status(driver)}.")
                 finished = True
             
             except Exception as e :
-                if ( args.debug ) : print(f"[DEB] Exception during CMP assesment " +
+                print_output("debug",f"Exception during CMP assesment " +
                                           f"\n[DEB] Errormessage: {e}") 
                 attempts += 1
     return (assessment_result, injection_success)
@@ -1266,8 +1239,7 @@ def inject_TC_string_cookie(driver, TCstring, identifier, domain) :
         driver.delete_all_cookies()
         driver.add_cookie(cookie)
     except Exception as e:
-        if ( args.debug ) : 
-            print(f"[ERR] Exception while injecting cookie ({domain})")
+        print_output("debug",f"Exception while injecting cookie ({domain})")
 
 '''
 Function to inject a TCstring into the Local Storage of the browser, using 
@@ -1278,8 +1250,7 @@ def inject_TC_string_LS(driver, TCstring, identifier, domain) :
         script = f"window.localStorage.setItem('{identifier}', '{TCstring}');"
         driver.execute_script(script)
     except Exception as e:
-        if ( args.debug ) : 
-            print(f"[ERR] Exception while injecting Local Storage ({domain})")
+        print_output("debug",f"Exception while injecting Local Storage ({domain})")
     pass
 
 '''
@@ -1291,8 +1262,7 @@ def assert_TCstring_allows_no_vendors(TCstring) :
     # Should this also check if "isServiceSpecific" is set to true???
     result = True
     if ( TCstring == "" ) :
-        if ( args.debug ) :
-            print(f"[DEB] TC string is empty")
+        print_output("debug",f"TC string is empty")
     else :
         # Run tcstring utility, check the vendorConsent section for any vendors
         # with value true
@@ -1312,8 +1282,7 @@ def assert_TCstring_allows_no_purposes(TCstring) :
     # Should this also check if "isServiceSpecific" is set to true???
     result = True
     if ( TCstring == "" ) :
-        if ( args.debug ) :
-            print(f"[DEB] TC string is empty")
+        print_debug("debug",f"TC string is empty")
     else :
         # Run tcstring utility, check the purposeConsent section for any purposes
         # with value true
@@ -1364,13 +1333,13 @@ def get_purposes_from_GVL(domain, identifier, url_under_test) :
                if ( "," in disclosed_cookie['identifier'] ) :
                    # If the cookie disclosure has multiple identifiers in single
                    # disclosure, loop over them and compare to the found cookie
-                   print("[DEV] looping over multiple identifiers")
+#                   print("[DEV] looping over multiple identifiers")
                    identifiers_in_disclosure = disclosed_cookie['identifier'].split(',')
                    for identifier_in_disclosure in identifiers_in_disclosure :
                        if ( identifier_in_disclosure == identifier ) :
                            # Cookie we were looking for found in disclosure
                            purposes = disclosed_cookie['purposes']
-                           print(f"[DEV] cookie found in batch")
+#                           print(f"[DEV] cookie found in batch")
                            cookie_disclosure_found = True
                            break
                        # In case the cookie disclosure uses a wildcard, we should
@@ -1389,8 +1358,6 @@ def get_purposes_from_GVL(domain, identifier, url_under_test) :
                          f"{disclosed_cookie['identifier']}")
 
                    #TODO : match wildcard
-
-
            # if an exact match of the cookie identifier is not found, we shoud check if a disclosed cookie contains a wildcard, or if cookies are disclosed in batch
 #           if ( not cookie_disclosure_found ) :
 #               for disclosed_cookie in disclosure :
@@ -1399,27 +1366,20 @@ def get_purposes_from_GVL(domain, identifier, url_under_test) :
 #                       batch_cookies = disclosed_cookie.split(",")
 #                       for batch_cookie in batch_cookies :
 #                           if ( batch_cookie == identifier ) :
-#                               print(f"cookie found in batch")
-#                               #cookie we were looking for in batch
-#                               purposes = disclosed_cookie['purposes']
-#                               cookie_disclosure_found = True
-#                               break
-           break
+
+               break
    if ( not vendor_found_in_gvl ) :
        increment_vendor_not_in_gvl()
-       if ( args.debug or args.verbose ) :
-           print(f"[VER] No vendor found in Global Vendor List for cookie " +
-                 f"'{identifier}' with domain '{domain}' ({url_under_test})")
+       print_output("verbose",f"No vendor found in Global Vendor List for cookie " +
+                f"'{identifier}' with domain '{domain}' ({url_under_test})")
    elif ( len(purposes) == 0 ) :
        increment_undisclosed_cookie()
-       if ( args.debug or args.verbose ) :
-           print(f"[VER] Vendor found in Global Vendor List, but no disclosure " +
-                 f"found for cookie '{identifier}' from domain '{domain}' " +
-                 f"({url_under_test})")
+       print_output("verbose",f"[VER] Vendor found in Global Vendor List, but no disclosure " +
+                f"found for cookie '{identifier}' from domain '{domain}' " +
+                f"({url_under_test})")
    else :
-       if ( args.debug ) :
-           print(f"[DEB] Cookie with identifier '{identifier}' is disclosed to " +
-                   f"have purposes: {purposes}")
+       print_output("debug",f"Cookie with identifier '{identifier}' is disclosed to " +
+                  f"have purposes: {purposes}")
    return (purposes, vendorID)
 
 '''
@@ -1448,10 +1408,8 @@ def retrieve_device_storage_disclosure(vendor) :
             except Exception as e:
                 attempts += 1
                 if ( attempts == MAX_RETRIES ) :
-                    print(f"[DEB] could not retrieve the cookie disclosure for " + 
-                          f"vendor {vendor}")
-                    if ( args.debug ) :
-                        print(f"\n[DEB] errormessage: \n{e} for url {disclosure_url}\n")
+                    print_output("debug",f"could not retrieve the cookie disclosure for " + 
+                          f"vendor {vendor} \n[DEB] errormessage: \n{e} for url {disclosure_url}\n")
                 
     else :
         # Disclosure already found in memory
@@ -1470,10 +1428,9 @@ def assess_Vendor(driver, cmpID, mechanism, identifier, domain, prefix, suffix) 
     incremented_violating_purpose = False
     incremented_failed_injection = False
     #TODO: keep track of unresolved cookies (incl domein)
-    if ( args.debug ) : print(f"\n[DEB] Starting Vendor assessment")
+    print_output("debug",f"\nStarting Vendor assessment")
     for testcase in TESTCASES['testcases'] :
-        if ( args.debug ) :
-            print(f"\n[DEB] running testcase {testcase['name']}")
+        print_output("debug",f"\nrunning testcase {testcase['name']}")
         attempts = 0
         finished = False
         allowed_purposes = "all"
@@ -1499,8 +1456,7 @@ def assess_Vendor(driver, cmpID, mechanism, identifier, domain, prefix, suffix) 
                 # Encode a TCstring to inject
                 TCstring = get_TCstring(cmpID, testcase['purposes'], testcase['vendors'])
 
-                if ( args.debug ) :
-                    print(f"[DEB] injecting TC string:\n      {TCstring}")
+                print_output("debug",f"injecting TC string:\n      {TCstring}")
 
                 # Wrap TCstring with prefix and suffix
                 TCstring_wrapped = f"{prefix}{TCstring}{suffix}"
@@ -1522,8 +1478,7 @@ def assess_Vendor(driver, cmpID, mechanism, identifier, domain, prefix, suffix) 
                        increment_failed_injection()
                        incremented_failed_injection = True
 
-                   if ( args.debug ) :
-                       print(f"[ERR] injection might have failed, injected string " +
+                       print_output("debug",f"injection might have failed, injected string " +
                              F"was not exactly returned by __tcfapi. ({domain})") 
                    finished = True
 
@@ -1554,7 +1509,7 @@ def assess_Vendor(driver, cmpID, mechanism, identifier, domain, prefix, suffix) 
                                 if ( purpose not in allowed_purposes ) :
                                     violating_purposes.append(purpose)
                         if ( len(violating_purposes) > 0 ) :
-                            print(f"[!!!] Cookie with id '{parsed_cookie['name']}' " +
+                            print_output("finding",f"Cookie with id '{parsed_cookie['name']}' " +
                                   f"and domain '{parsed_cookie['domain']}' is set " + 
                                   "while it is disclosed to require purposes that " +
                                   f"are not consented to: {violating_purposes}" +
@@ -1573,7 +1528,7 @@ def assess_Vendor(driver, cmpID, mechanism, identifier, domain, prefix, suffix) 
                             # that set this cookie is allowed in our injected 
                             # TC string
                             if ( vendor != 0 and ( allowed_vendors == "none" or vendor not in allowed_vendors )) :
-                                print(f"[!!!] Cookie with identifier " + 
+                                print_output("finding",f"Cookie with identifier " + 
                                       f"'{parsed_cookie['name']}' and domain " + 
                                       f"'{parsed_cookie['domain']}' is set, while " + 
                                       f"it's vendor with id '{vendor}' was not " +
@@ -1589,14 +1544,13 @@ def assess_Vendor(driver, cmpID, mechanism, identifier, domain, prefix, suffix) 
                                 incremented_violating_vendor = True
 
 
-                if ( not third_party_cookies_present and args.debug ) : 
-                    print(f"[DEB] No Third party cookies with length greater " + 
+                if ( not third_party_cookies_present ) : 
+                    print_output("debug",f"No Third party cookies with length greater " + 
                           "than 10 found")
                 finished = True
 
             except Exception as e: 
-                if ( args.debug ) :
-                    print(f"[DEB] Exception during Vendor assessment for cookie " + 
+                print_output("debug",f"Exception during Vendor assessment for cookie " + 
                           f"{parsed_cookie['name']} from domain {parsed_cookie['domain']}")
                 attempts += 1
 
@@ -1711,7 +1665,7 @@ assessing CMPs and Vendors when instructed
 def worker_main(url) :
     driver = configure_crawler()
 
-    if ( args.debug ) : print(f"\n[DEB] Attempting to detect TCF on {url}")   
+    print_output("debug",f"Attempting to detect TCF on {url}")   
     domain = remove_path(url)
     URL_passed_filter = filter_unsafe_domain(domain)
 
@@ -1719,12 +1673,6 @@ def worker_main(url) :
     if ( URL_passed_filter and detect_tcf(driver, url) ) :
         TCstring_during_detection = ""
         interaction_success = interact_dialog_accept_all(driver, url)
-
-        #some sites navigate away to subscription page, navigate back if needed
-#        if ( domain != driver.current_url) : 
-#            navigate_to_url(driver, domain) 
-#        print("sleeping")
-#        time.sleep(50 * TIME_FACTOR)
 
         storage_mechanism = "unk"
         detect_TC_in_cookies = detect_TCstring_cookie(driver, domain)
@@ -1755,8 +1703,8 @@ def worker_main(url) :
                 storage_mechanism = "LS"
         else :
             storage_mechanism = "cookie"
-        if ( Storage_identifier == "" and ( args.verbose or args.debug )) : 
-            print("[ERR] No TCString found in cookies or Local Storage, could " + 
+        if ( Storage_identifier == "" ) : 
+            print_output("verbose","No TCString found in cookies or Local Storage, could " + 
                   f"indicate server-side storage. Unable to proceed with " +
                   f"assessment ({domain})")
         CMP_identifier = identify_CMP(driver)
@@ -1774,8 +1722,7 @@ def worker_main(url) :
             if ( CMP_assessment_result[1] ):
                 vendors_assessment_result = assess_Vendor(driver, CMP_identifier, storage_mechanism, Storage_identifier, url, prefix, suffix)
             else :
-                if ( args.debug ) :
-                    print(f"[DEB] Skipped Vendor assessment since Consent " + 
+                print_output("debug",f"Skipped Vendor assessment since Consent " + 
                           "Injection seems to have failed.") 
 
         if ( args.output != None ) :
@@ -1800,11 +1747,11 @@ unsupported cookie dialog buttons.
 def take_screenshot(driver, url) :
     try: 
         driver.save_screenshot(f"{screenshot_folder}/{url}.png")
-        if ( args.debug ) : print(f"[DEB] screenshot saved in {screenshot_folder}" + 
+        print_output("debug",f"screenshot saved in {screenshot_folder}" + 
                                   f"/{url}.png")
     except Exception as e :
-        print("[ERR] Exception while taking screenshot ({url})")
-        if ( args.debug ) : print(f"[DEB] Errormessage: \n {e}")
+        print_output("debug",f"Exception while taking screenshot ({url})" +
+                     f"\n[DEB] Errormessage: \n {e}")
 
 '''
 Fuction to print the current status of the script
@@ -1893,7 +1840,7 @@ print("[...] Waiting for last thread(s) to finish")
 time.sleep(200 * TIME_FACTOR)
 
 if ( args.screenshot and len(os.listdir(screenshot_folder)) == 0 ) :
-    if ( args.debug ) : print("[DEB] removing screenshot folder, since no " + 
+    print_output("debug","Removing screenshot folder, since no " + 
                              "screenshots were made" )
     os.rmdir(screenshot_folder)
 
